@@ -12,11 +12,7 @@
     h1{margin:20px;font-size:36px;color:#ff66a3;text-shadow:1px 1px #fff}
     #game-area{position:relative;width:90%;max-width:800px;height:400px;background:linear-gradient(to bottom,#ffe6f0,#d4fcd6);border-radius:20px;border:4px dashed #fff;overflow:hidden}
     .character{position:absolute;bottom:0;width:40%;max-width:300px;aspect-ratio:1/1;background-size:contain;background-repeat:no-repeat;background-position:center}
-    #player1{left:30px;background-image:url('https://i.imgur.com/UJ3Et9A.png')}
     #player1.attack{transform:translateX(10px);transition:transform .2s}
-    #player1.stage4{background-image:url('https://i.imgur.com/KrYWrq4.png')}
-    #player1.stage6{background-image:url('https://i.imgur.com/x2gYkcH.png');animation:shake .1s infinite}
-    #player2{right:30px;background-image:url('https://i.imgur.com/T1pOdp8.png')}
     @keyframes shake{0%{transform:translate(0)}25%{transform:translate(2px,-2px)}50%{transform:translate(-2px,2px)}75%{transform:translate(2px,2px)}100%{transform:translate(-2px,-2px)}}
     #enemy-text{position:absolute;right:80px;bottom:80px;font-size:40px;font-weight:bold;color:#ff3366;text-shadow:1px 1px 0 #fff;white-space:nowrap;transition:transform .3s,opacity .3s}
     .break1{transform:rotate(-5deg) scale(.95)}.break2{transform:rotate(5deg) scale(.9);opacity:.8}.break3{transform:rotate(-10deg) scale(.8);opacity:.6}.break4{transform:rotate(20deg) scale(.5);opacity:.3}
