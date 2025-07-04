@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beat the Period Cramps</title>
+  <!-- SweetAlert2 for the final heartfelt popup -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    /* ------------------------------ STYLES (unchanged) ------------------------------ */
+    body{margin:0;font-family:'Comic Sans MS',cursive;background:linear-gradient(135deg,#ffd1dc,#c1f7c7);display:flex;flex-direction:column;align-items:center;text-align:center;min-height:100vh;overflow-x:hidden}
+    h1{margin:20px;font-size:36px;color:#ff66a3;text-shadow:1px 1px #fff}
+    #game-area{position:relative;width:90%;max-width:800px;height:400px;background:linear-gradient(to bottom,#ffe6f0,#d4fcd6);border-radius:20px;border:4px dashed #fff;overflow:hidden}
+    .character{position:absolute;bottom:0;width:40%;max-width:300px;aspect-ratio:1/1;background-size:contain;background-repeat:no-repeat;background-position:center}
+    #player1{left:30px;background-image:url('https://i.imgur.com/UJ3Et9A.png')}
+    #player1.attack{transform:translateX(10px);transition:transform .2s}
+    #player1.stage4{background-image:url('https://i.imgur.com/KrYWrq4.png')}
+    #player1.stage6{background-image:url('https://i.imgur.com/x2gYkcH.png');animation:shake .1s infinite}
+    #player2{right:30px;background-image:url('https://i.imgur.com/T1pOdp8.png')}
+    @keyframes shake{0%{transform:translate(0)}25%{transform:translate(2px,-2px)}50%{transform:translate(-2px,2px)}75%{transform:translate(2px,2px)}100%{transform:translate(-2px,-2px)}}
+    #enemy-text{position:absolute;right:80px;bottom:80px;font-size:40px;font-weight:bold;color:#ff3366;text-shadow:1px 1px 0 #fff;white-space:nowrap;transition:transform .3s,opacity .3s}
+    .break1{transform:rotate(-5deg) scale(.95)}.break2{transform:rotate(5deg) scale(.9);opacity:.8}.break3{transform:rotate(-10deg) scale(.8);opacity:.6}.break4{transform:rotate(20deg) scale(.5);opacity:.3}
+    #health-bar-container{width:80%;max-width:300px;height:25px;background:#ffe6eb;border:3px solid #ff66a3;border-radius:15px;margin-top:20px;display:none}
+    #health-bar{height:100%;width:100%;background:linear-gradient(to right,#ff4d88,#ff99bb);border-radius:15px;transition:width .3s}
+    #attack-btn{margin-top:20px;padding:12px 30px;font-size:18px;cursor:pointer;background:#ff66a3;color:#fff;border:none;border-radius:25px;box-shadow:0 4px #e04e8c;display:none}
+    #celebration{display:none;font-size:30px;color:#ff66a3;margin-top:20px;text-align:center;animation:bounce 1s infinite alternate}
+    @keyframes bounce{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}
+    .heart{position:absolute;font-size:20px;color:#ff66a3;animation:floatUp 1s ease-out forwards}
+    @keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+    .confetti{position:absolute;font-size:22px;color:#f8c;animation:explode 1.2s ease-out forwards}
+    @keyframes explode{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2) translateY(-100px)}}
+    #explosion-gif{position:absolute;right:40px;top:50%;width:200px;transform:translateY(-50%);display:none;pointer-events:none;z-index:10}
+    #dialogue-box{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:80%;max-width:600px;background:rgba(255,255,255,.8);border:3px solid #ff66a3;border-radius:15px;padding:16px 20px;font-size:18px;color:#ff3366;font-family:'Comic Sans MS',cursive;display:none;box-shadow:0 4px 8px rgba(0,0,0,.1);z-index:100;text-align:center;animation:fadeInText .4s ease}
+    @keyframes fadeInText{from{opacity:0}to{opacity:1}}
+    @media(max-width:600px){.character{width:35%}#enemy-text{font-size:28px;right:50px;bottom:60px}#attack-btn{font-size:16px;padding:10px 20px}#celebration{font-size:24px}}
+  </style>
+</head>
+<body>
+  <h1>💪 Beat the Period Cramps!</h1>
+  <div id="game-area">
+    <div id="player1" class="character"></div>
+    <div id="player2" class="character"></div>
+    <div id="enemy-text">PERIOD CRAMPS</div>
+    <img id="explosion-gif" src="Tenor-unscreen.gif" alt="explosion" />
+    <div id="dialogue-box"></div>
+  </div>
+  <div id="health-bar-container"><div id="health-bar"></div></div>
+  <button id="attack-btn">💥 Punch It!</button>
+  <div id="celebration">🎉 You Defeated the Cramps! 💃</div>
+
+  <!-- AUDIO ELEMENTS -->
+  <audio id="gasp-sound" src="Crowd GaspShock - Sound Effect (HD).mp3"></audio>
+  <audio id="transform-sound" src="Roblox Angry Sound Effect.mp3"></audio>
+  <audio id="punch-sound" src="Punch Sound Effects.mp3"></audio>
+  <audio id="final-blow-sound" src="anime hit sound effect.mp3"></audio>
+  <audio id="defeat-sound" src="Explosion Meme Green Screens.mp3"></audio>
+  <audio id="celebrate-sound" src="YAY Kids (Celebration) Sound Effect [Free Download].mp3"></audio>
+  <audio id="bg-music" src="November-Waltz - Work At a Pizza Place.mp3" autoplay loop></audio>
+
+  <script>
+    /* ------------------------------ ELEMENT REFERENCES ------------------------------ */
+    const healthBar = document.getElementById('health-bar');
+    const healthBarContainer = document.getElementById('health-bar-container');
+    const attackBtn = document.getElementById('attack-btn');
+    const celebration = document.getElementById('celebration');
+    const gameArea = document.getElementById('game-area');
+    const player1 = document.getElementById('player1');
+    const player2 = document.getElementById('player2');
+    const enemyText = document.getElementById('enemy-text');
+    const explosionGif = document.getElementById('explosion-gif');
+    const dialogueBox = document.getElementById('dialogue-box');
+
+    const gaspSound = document.getElementById('gasp-sound');
+    const transformSound = document.getElementById('transform-sound');
+    const punchSound = document.getElementById('punch-sound');
+    const finalBlowSound = document.getElementById('final-blow-sound');
+    const defeatSound = document.getElementById('defeat-sound');
+    const celebrateSound = document.getElementById('celebrate-sound');
+    const bgMusic = document.getElementById('bg-music');
+
+    document.body.addEventListener('click',()=>{if(bgMusic.paused){bgMusic.play().catch(()=>{})}}, {once:true});
+
+    /* ------------------------------ TRANSFORMATION IMAGES ------------------------------ */
+    const angerStages=[
+      'download%20(6).png',
+      'download%20(5).png',
+      'download%20(4).png',
+      'download%20(1).png',
+      'download.png',
+      'download%20(3).png'
+    ];
+
+    /* ------------------------------ DIALOGUE LINES ------------------------------ */
+    const dialogueLines=[
+      "😖 PERIOD CRAMPS: I'm back again to make her miserable.",
+      "😠 ME: Not on my watch. She's already hurting enough!",
+      "😤 CRAMPS: What can you do? You can't feel her pain!",
+      "💘 ME: Maybe not... but I can fight for her. Every punch is for her comfort."
+    ];
+
+    let health=100;
+    let hits=0;
+
+    /* ------------------------------ FUNCTIONS ------------------------------ */
+    function runDialogueSequence(i=0){
+      if(i===0) dialogueBox.style.display='block';
+      if(i<dialogueLines.length){
+        dialogueBox.textContent=dialogueLines[i];
+        setTimeout(()=>runDialogueSequence(i+1),1800);
+      }else{
+        dialogueBox.style.display='none';
+        powerUpIntro();
+      }
+    }
+
+    function powerUpIntro(){
+      let i=0;
+      gaspSound.play();
+      function next(){
+        if(i<angerStages.length){
+          player1.style.backgroundImage=`url('${angerStages[i]}')`;
+          if(i!==0) transformSound.play();
+          if(i===3) player1.classList.add('stage4');
+          if(i===5) player1.classList.add('stage6');
+          i++;
+          setTimeout(next,600);
+        }else{
+          player1.classList.remove('stage4');
+          healthBarContainer.style.display='block';
+          attackBtn.style.display='inline-block';
+        }
+      }
+      next();
+    }
+
+    function showHeart(){const h=document.createElement('div');h.className='heart';h.textContent='💖';h.style.left=(Math.random()*40+80)+'px';h.style.top='200px';gameArea.appendChild(h);setTimeout(()=>h.remove(),1000)}
+
+    function showConfetti(){for(let i=0;i<20;i++){const c=document.createElement('div');c.className='confetti';c.textContent='✨';c.style.left=(Math.random()*200+300)+'px';c.style.top=(Math.random()*100+100)+'px';gameArea.appendChild(c);setTimeout(()=>c.remove(),1200)}}
+
+    function updateEnemyText(){hits++;enemyText.classList.add('break'+hits)}
+
+    function attack(){if(health<=0)return;const final=health<=25;health=Math.max(0,health-25);healthBar.style.width=health+'%';final? (finalBlowSound.currentTime=0,finalBlowSound.play()):(punchSound.currentTime=0,punchSound.play());showHeart();updateEnemyText();player1.classList.add('attack');setTimeout(()=>player1.classList.remove('attack'),200);if(health===0) defeatSequence();}
+
+    function defeatSequence(){
+      enemyText.textContent='';
+      enemyText.style.color='#ff0000';
+      defeatSound.play();
+      explosionGif.style.display='block';
+      showConfetti();
+      celebrateSound.play();
+      celebration.style.display='block';
+      attackBtn.disabled=true;
+      attackBtn.textContent='All Clear!';
+      player2.style.opacity='0.3';
+      setTimeout(()=>{
+        Swal.fire({
+          title:'♡✧˚ ༘ ⋆｡♡˚',
+          text:"I know I'm far away and can't help you in person right now, but I hope this little game made your day a bit better. MELOVEEYOUUSOMUCHHH BABYYYY MWUAHHHHH ♡(˃͈ દ ˂͈ ༶ )",
+          confirmButtonText:'₍ᐢ. .ᐢ₎ ₊˚⊹♡',
+          confirmButtonColor:'#ff66a3',
+          backdrop:true
+        }).then(()=>resetGame());
+      },3000);
+    }
+
+    function resetGame(){
+      health=100;hits=0;['break1','break2','break3','break4'].forEach(c=>enemyText.classList.remove(c));
+      enemyText.textContent='PERIOD CRAMPS';enemyText.style.color='#ff3366';
+      celebration.style.display='none';player2.style.opacity='1';
+      attackBtn.disabled=false;attackBtn.textContent='💥 Punch It!';
+      healthBar.style.width='100%';explosionGif.style.display='none';
+      setTimeout(()=>runDialogueSequence(0),1000);
+    }
+
+    /* ------------------------------ EVENT LISTENERS ------------------------------ */
+    attackBtn.addEventListener('click',attack);
+    window.addEventListener('load',()=>runDialogueSequence());
+  </script>
+</body>
+</html>
